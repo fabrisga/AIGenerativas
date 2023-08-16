@@ -1,0 +1,42 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const chatLog = document.getElementById("chat-log");
+    const userInput = document.getElementById("user-input");
+    const sendButton = document.getElementById("send-button");
+
+    sendButton.addEventListener("click", function () {
+        const userMessage = userInput.value;
+        addMessage("Você", userMessage);
+
+        if (userMessage.toLowerCase() === "adeus") {
+            addMessage("Chatbot", "Espero que tenha sido útil. Cuide-se!");
+        } else {
+            fetchResponse(userMessage);
+        }
+
+        userInput.value = "";
+    });
+
+    function addMessage(sender, message) {
+        const messageElement = document.createElement("div");
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatLog.appendChild(messageElement);
+    }
+
+    function fetchResponse(userInput) {
+        fetch("/get_response", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_input: userInput }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            const chatbotMessage = data.chatbot_response;
+            addMessage("Chatbot", chatbotMessage);
+        })
+        .catch((error) => {
+            console.error("Erro na solicitação:", error);
+        });
+    }
+});
